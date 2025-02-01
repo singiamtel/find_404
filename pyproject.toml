@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "404_finder"
+version = "0.1.0"
+authors = [
+  { name = "Sergio Garcia", email = "sergio@garciadelacruz.es" },
+]
+description = "A tool to find broken links (404s) and oversized pages in websites"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "requests>=2.25.0",
+    "beautifulsoup4>=4.9.0",
+]
+
+[project.scripts]
+404-finder = "404_finder.cli:main"
+
+[project.urls]
+"Homepage" = "https://github.com/singiamtel/404-finder"
+"Bug Tracker" = "https://github.com/singiamtel/404-finder/issues" 
