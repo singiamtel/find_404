@@ -71,5 +71,9 @@ def main():
     
     print(f"Successfully bumped version to {new_version} and created release tag")
 
+    # Create a new release
+    print("You can create a new release with the following command:")
+    print(f"gh release create v{new_version} -t \"Release {new_version}\" -n \"Release notes for {new_version}\"")
+
 if __name__ == "__main__":
     main() 
