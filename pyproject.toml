@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "404_finder"
+name = "find-404"
 version = "0.1.0"
 authors = [
   { name = "Sergio Garcia", email = "sergio@garciadelacruz.es" },
@@ -22,8 +22,11 @@ dependencies = [
 ]
 
 [project.scripts]
-404-finder = "404_finder.cli:main"
+find-404 = "find_404.cli:main"
 
 [project.urls]
 "Homepage" = "https://github.com/singiamtel/404-finder"
-"Bug Tracker" = "https://github.com/singiamtel/404-finder/issues" 
+"Bug Tracker" = "https://github.com/singiamtel/404-finder/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/find_404"] 
