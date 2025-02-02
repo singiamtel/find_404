@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "find-404"
+name = "find_404"
 version = "1.0.0"
 authors = [
   { name = "Sergio Garcia", email = "sergio@garciadelacruz.es" },
