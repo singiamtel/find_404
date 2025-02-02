@@ -1,0 +1,69 @@
+name: Check Broken Links
+
+on:
+  workflow_call:
+    inputs:
+      url:
+        required: true
+        type: string
+        description: "URL to check for broken links"
+      max_size:
+        required: false
+        type: number
+        default: 0
+        description: "Maximum allowed size in bytes for any page (0 for no limit)"
+      workers:
+        required: false
+        type: number
+        default: 10
+        description: "Number of parallel workers"
+      max_depth:
+        required: false
+        type: number
+        default: 0
+        description: "Maximum depth to crawl (0 for no limit)"
+      verbose:
+        required: false
+        type: boolean
+        default: false
+        description: "Enable verbose logging"
+
+jobs:
+  check-links:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install find-404
+        run: pip install find-404
+
+      - name: Build command
+        id: build-cmd
+        run: |
+          CMD="find-404 ${{ inputs.url }}"
+          
+          if [ "${{ inputs.max_size }}" != "0" ]; then
+            CMD="$CMD --max-size ${{ inputs.max_size }}"
+          fi
+          
+          if [ "${{ inputs.workers }}" != "10" ]; then
+            CMD="$CMD --workers ${{ inputs.workers }}"
+          fi
+          
+          if [ "${{ inputs.max_depth }}" != "0" ]; then
+            CMD="$CMD --max-depth ${{ inputs.max_depth }}"
+          fi
+          
+          if [ "${{ inputs.verbose }}" == "true" ]; then
+            CMD="$CMD --verbose"
+          fi
+          
+          echo "cmd=$CMD" >> $GITHUB_OUTPUT
+
+      - name: Check for broken links
+        run: ${{ steps.build-cmd.outputs.cmd }}
+
+      - name: Upload results
+        uses: actions/upload-artifact@v3
+        with:
+          name: broken-links-report
+          path: result_*.jsonl
+          if-no-files-found: ignore 
