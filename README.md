@@ -5,13 +5,13 @@ A Python tool to crawl websites and find broken links (404s) and oversized pages
 ## Installation
 
 ```bash
-pip install find_404
+pip install find-404
 ```
 
 ## Usage
 
 ```bash
-find_404 example.com [options]
+find-404 example.com [options]
 ```
 
 ### Options
@@ -25,13 +25,13 @@ find_404 example.com [options]
 
 ```bash
 # Check for broken links on example.com
-find_404 example.com
+find-404 example.com
 
 # Check for broken links and pages larger than 1MB
-find_404 example.com --max-size 1000000
+find-404 example.com --max-size 1000000
 
 # Crawl with 20 parallel workers and verbose logging
-find_404 example.com --workers 20 --verbose
+find-404 example.com --workers 20 --verbose
 ```
 
 ### Output
