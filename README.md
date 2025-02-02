@@ -5,13 +5,13 @@ A Python tool to crawl websites and find broken links (404s) and oversized pages
 ## Installation
 
 ```bash
-pip install 404-finder
+pip install find_404
 ```
 
 ## Usage
 
 ```bash
-404-finder example.com [options]
+find_404 example.com [options]
 ```
 
 ### Options
@@ -25,18 +25,19 @@ pip install 404-finder
 
 ```bash
 # Check for broken links on example.com
-404-finder example.com
+find_404 example.com
 
 # Check for broken links and pages larger than 1MB
-404-finder example.com --max-size 1000000
+find_404 example.com --max-size 1000000
 
 # Crawl with 20 parallel workers and verbose logging
-404-finder example.com --workers 20 --verbose
+find_404 example.com --workers 20 --verbose
 ```
 
 ### Output
 
 The tool generates a JSONL file named `result_domain.jsonl` containing details about each URL visited, including:
+
 - URL
 - Status code
 - Page size
