@@ -43,6 +43,17 @@ def update_version_in_files(new_version):
         )
         pyproject_path.write_text(updated_content)
     
+    # Update __init__.py if it exists
+    init_path = Path("src/find_404/__init__.py")
+    if init_path.exists():
+        content = init_path.read_text()
+        updated_content = re.sub(
+            r'__version__\s*=\s*"[^"]+"',
+            f'__version__ = "{new_version}"',
+            content
+        )
+        init_path.write_text(updated_content)
+    
     # Update package.json if it exists
     package_json = Path("package.json")
     if package_json.exists():

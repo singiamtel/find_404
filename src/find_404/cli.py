@@ -2,8 +2,9 @@
 
 import argparse
 import json
+import sys
 from urllib.parse import urlparse
-from . import crawl_site, setup_logging
+from . import crawl_site, setup_logging, __version__
 from .crawler import is_same_domain
 
 
@@ -11,6 +12,8 @@ def main():
     """Main entry point for the CLI."""
     parser = argparse.ArgumentParser(
         description='Crawl a website and check for broken links and size limits')
+    parser.add_argument('--version', action='version',
+                        version=f'find-404 {__version__}')
     parser.add_argument('url', help='The URL to start crawling from')
     parser.add_argument('--max-size', type=int,
                         help='Maximum allowed size in bytes for any page', default=None)
