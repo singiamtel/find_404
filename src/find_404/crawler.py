@@ -62,7 +62,10 @@ def is_same_domain(url, base_domain):
     main_domain = '.'.join(netloc.split('.')[-2:])
     base_main_domain = '.'.join(base_netloc.split('.')[-2:])
 
-    return scheme == base_scheme and main_domain == base_main_domain
+    # Don't consider scheme change if it's just http vs https
+    schemes_match = (scheme == base_scheme) or (scheme in ('http', 'https') and base_scheme in ('http', 'https'))
+
+    return schemes_match and main_domain == base_main_domain
 
 
 def is_valid_url(url):
