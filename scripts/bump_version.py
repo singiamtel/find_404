@@ -37,7 +37,7 @@ def update_version_in_files(new_version):
     if pyproject_path.exists():
         content = pyproject_path.read_text()
         updated_content = re.sub(
-            r'version\s*=\s*"[^"]+"',
+            r'!(bump-)version\s*=\s*"[^"]+"',
             f'version = "{new_version}"',
             content
         )
