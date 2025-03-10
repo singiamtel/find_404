@@ -64,6 +64,8 @@ def main():
     for error in final_errors:
         logger.error(error)
 
+    print(f"Results written to {output_file}", file=sys.stderr)
+
     if has_errors or size_exceeded:
         return 1
     return 0
