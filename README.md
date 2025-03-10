@@ -20,6 +20,7 @@ find-404 example.com [options]
 - `--workers N`: Number of parallel workers (default: 10)
 - `--max-depth N`: Maximum depth to crawl (default: no limit)
 - `--verbose`: Enable verbose logging
+- `--version`: Show the version number
 
 ### Example
 
