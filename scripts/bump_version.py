@@ -5,8 +5,7 @@ import re
 from pathlib import Path
 import json
 
-
-def get_current_version():
+def get_current_version() -> str:
     pyproject_path = Path("pyproject.toml")
     if pyproject_path.exists():
         content = pyproject_path.read_text()
@@ -27,7 +26,7 @@ def bump_version(current_version, bump_type):
         return f"{major}.{minor}.{patch + 1}"
 
 
-def update_version_in_files(new_version):
+def update_version_in_files(new_version: str):
     # Update pyproject.toml if it exists
     pyproject_path = Path("pyproject.toml")
     if pyproject_path.exists():
@@ -49,9 +48,11 @@ def update_version_in_files(new_version):
     # Update uv.lock if it exists
     uv_lock = Path("uv.lock")
     if uv_lock.exists():
-        data = json.loads(uv_lock.read_text())
-        data["version"] = new_version
-        uv_lock.write_text(json.dumps(data, indent=2) + "\n")
+        content = uv_lock.read_text()
+        updated_content = re.sub(
+            r'!(bump-)version\s*=\s*"[^"]+"', f'version = "{new_version}"', content
+        )
+        uv_lock.write_text(updated_content)
 
 
 def main():
@@ -61,6 +62,7 @@ def main():
 
     bump_type = sys.argv[1]
     current_version = get_current_version()
+    print(f"Current version: {current_version}")
     new_version = bump_version(current_version, bump_type)
 
     # Update version in files
