@@ -22,7 +22,7 @@ dependencies = [
 ]
 
 [project.scripts]
-find-404 = "find_404.cli:main"
+find_404 = "find_404.cli:main"
 bump-version = "scripts.bump_version:main"
 
 [project.urls]

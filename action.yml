@@ -32,13 +32,13 @@ jobs:
   check-links:
     runs-on: ubuntu-latest
     steps:
-      - name: Install find-404
-        run: pip install find-404
+      - name: Install find_404
+        run: pip install find_404
 
       - name: Build command
         id: build-cmd
         run: |
-          CMD="find-404 ${{ inputs.url }}"
+          CMD="find_404 ${{ inputs.url }}"
           
           if [ "${{ inputs.max_size }}" != "0" ]; then
             CMD="$CMD --max-size ${{ inputs.max_size }}"

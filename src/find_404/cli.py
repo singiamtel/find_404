@@ -14,7 +14,7 @@ def main():
         description="Crawl a website and check for broken links and size limits"
     )
     parser.add_argument(
-        "--version", action="version", version=f"find-404 {__version__}"
+        "--version", action="version", version=f"find_404 {__version__}"
     )
     parser.add_argument("url", help="The URL to start crawling from")
     parser.add_argument(

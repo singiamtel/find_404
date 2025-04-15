@@ -5,13 +5,13 @@ A Python tool to crawl websites and find broken links (404s) and oversized pages
 ## Install the CLI
 
 ```bash
-pip install find-404
+pip install find_404
 ```
 
 ## Usage
 
 ```bash
-find-404 example.com [options]
+find_404 example.com [options]
 ```
 
 ### Options
@@ -26,13 +26,13 @@ find-404 example.com [options]
 
 ```bash
 # Check for broken links on example.com
-find-404 example.com
+find_404 example.com
 
 # Check for broken links and pages larger than 1MB
-find-404 example.com --max-size 1000000
+find_404 example.com --max-size 1000000
 
 # Crawl with 20 parallel workers and verbose logging
-find-404 example.com --workers 20 --verbose
+find_404 example.com --workers 20 --verbose
 ```
 
 ## Use in Github Actions
@@ -48,7 +48,7 @@ on:
 
 jobs:
   check-links:
-    uses: yourusername/find-404/.github/workflows/check-links.yml@main
+    uses: singiamtel/find_404/.github/workflows/check-links.yml@main
     with:
       url: 'https://example.com'
       max_size: 5000000  # Optional: 5MB limit
