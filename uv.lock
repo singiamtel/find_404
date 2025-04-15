@@ -131,8 +131,8 @@ wheels = [
 ]
 
 [[package]]
-name = "find_404"
-version = "1.1.6"
+name = "find-404"
+version = "1.1.5"
 source = { editable = "." }
 dependencies = [
     { name = "beautifulsoup4" },
