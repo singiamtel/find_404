@@ -2,4 +2,4 @@
 
 __version__ = "1.1.5"
 
-from .crawler import crawl_site, setup_logging 
+from .crawler import crawl_site as crawl_site, setup_logging as setup_logging

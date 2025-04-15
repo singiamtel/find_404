@@ -3,7 +3,6 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
-import json
 import sys
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
