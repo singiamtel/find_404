@@ -4,8 +4,9 @@ import argparse
 import json
 import sys
 from urllib.parse import urlparse
-from . import crawl_site, setup_logging, __version__
+from . import crawl_site, setup_logging
 from .crawler import is_same_domain
+import importlib.metadata
 
 
 def main():
@@ -13,8 +14,9 @@ def main():
     parser = argparse.ArgumentParser(
         description="Crawl a website and check for broken links and size limits"
     )
+    importlib.metadata.version('find_404')
     parser.add_argument(
-        "--version", action="version", version=f"find_404 {__version__}"
+        "--version", action="version", version=f"find_404 {importlib.metadata.version('find_404')}"
     )
     parser.add_argument("url", help="The URL to start crawling from")
     parser.add_argument(

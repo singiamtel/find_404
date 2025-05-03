@@ -1,13 +1,9 @@
 # Creating a new version
 
->[!WARNING]
-> Make sure that `pyproject.toml` and `__init__.py` match. The version bump script is not very resilient
-
 ```bash
-uv run scripts/bump_version.py [major|minor|patch]
+uv version --bump [major|minor|patch]
+NEW_VERSION="$(uv version | cut -d" " -f2)"
+git tag v$NEW_VERSION
+git push --tags
+gh release create v$NEW_VERSION -t "Release $NEW_VERSION" --notes-from-tag
 ```
-
-## TODO
-
-- Make the bump script resilient to failures, and ideally atomic
-    - Possibly use [bumpver](https://github.com/mbarkhau/bumpver) instead
