@@ -6,8 +6,7 @@ import json
 import sys
 from urllib.parse import urlparse
 
-from . import crawl_site, setup_logging
-from .crawler import is_same_domain
+from .crawler import crawl_site, is_same_domain, setup_logging
 
 
 def main() -> int:

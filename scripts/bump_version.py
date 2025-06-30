@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import re
 import subprocess
 import sys
 from typing import Protocol, TypedDict
@@ -53,7 +52,7 @@ class BumpVersion:
     def run(self, context: Context) -> None:
         """Bumps the version number in the actual codebase. We use `uv version` to do so."""
         bump_type = context["bump_type"]
-        result = subprocess.run(
+        subprocess.run(
             ["uv", "version", "--bump", bump_type],
             capture_output=True,
             text=True,
