@@ -1,15 +1,16 @@
 """Core crawler functionality for finding broken links."""
 
+import logging
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import urljoin, urlparse
+
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin, urlparse
-import sys
-import logging
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def setup_logging(debug=False, output_file=None):
-    """Configure logging with handlers for file (INFO) and stderr (ERROR and DEBUG)"""
+    """Configure logging with handlers for file (INFO) and stderr (ERROR and DEBUG)."""
     # Create our own logger
     logger = logging.getLogger("crawler")
     logger.handlers = []  # Clear any existing handlers
@@ -108,7 +109,7 @@ def process_url(url_info):
                 "links": [],
                 "referrer": None,
             }
-        elif status_code == "error":
+        if status_code == "error":
             logger.info(f"Found status code {status_code}: {url}")
             return url, {"status_code": 0, "size": 0, "links": [], "referrer": None}
 
@@ -149,16 +150,15 @@ def process_url(url_info):
 
             logger.debug(f"Found {len(result['links'])} new links from {url}")
 
-    except requests.RequestException as e:
-        logger.error(f"Error fetching {url}: {e}")
+    except requests.RequestException:
+        logger.exception(f"Error fetching {url}")
         return url, {"status_code": "error", "size": 0, "links": [], "referrer": None}
 
     return url, result
 
 
 def crawl_site(start_url, max_workers=10, max_depth=None):
-    """
-    Crawl a website starting from start_url and check for broken links.
+    """Crawl a website starting from start_url and check for broken links.
 
     Args:
         start_url (str): The URL to start crawling from
@@ -167,6 +167,7 @@ def crawl_site(start_url, max_workers=10, max_depth=None):
 
     Returns:
         dict: Results containing status codes and sizes for all URLs
+
     """
     logger = logging.getLogger("crawler")
     logger.debug(f"Starting crawl from {start_url}")
@@ -199,7 +200,7 @@ def crawl_site(start_url, max_workers=10, max_depth=None):
                     results[url] = data
 
                     for new_url, new_should_recurse, _, new_depth in data.get(
-                        "links", []
+                        "links", [],
                     ):
                         if new_url not in seen_urls and (
                             max_depth is None or new_depth <= max_depth
@@ -212,11 +213,11 @@ def crawl_site(start_url, max_workers=10, max_depth=None):
                                     new_should_recurse,
                                     url,
                                     new_depth,
-                                )
+                                ),
                             )
 
                 except Exception as e:
-                    logger.error(f"Error processing {url}: {e}")
+                    logger.exception(f"Error processing {url}: {e}")
                     results[url] = {
                         "status_code": "error",
                         "size": 0,

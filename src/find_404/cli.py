@@ -1,22 +1,23 @@
 """Command-line interface for 404 Finder."""
 
 import argparse
+import importlib.metadata
 import json
 import sys
 from urllib.parse import urlparse
+
 from . import crawl_site, setup_logging
 from .crawler import is_same_domain
-import importlib.metadata
 
 
-def main():
+def main() -> int:
     """Main entry point for the CLI."""
     parser = argparse.ArgumentParser(
-        description="Crawl a website and check for broken links and size limits"
+        description="Crawl a website and check for broken links and size limits",
     )
-    importlib.metadata.version('find_404')
+    importlib.metadata.version("find_404")
     parser.add_argument(
-        "--version", action="version", version=f"find_404 {importlib.metadata.version('find_404')}"
+        "--version", action="version", version=f"find_404 {importlib.metadata.version('find_404')}",
     )
     parser.add_argument("url", help="The URL to start crawling from")
     parser.add_argument(
@@ -26,7 +27,7 @@ def main():
         default=None,
     )
     parser.add_argument(
-        "--workers", type=int, help="Number of parallel workers", default=10
+        "--workers", type=int, help="Number of parallel workers", default=10,
     )
     parser.add_argument(
         "--max-depth",
@@ -64,7 +65,7 @@ def main():
         logger.info(json.dumps(result))
         if isinstance(info["status_code"], int) and 400 <= info["status_code"] < 600:
             final_errors.append(
-                f"Error: {url} returned status code {info['status_code']}"
+                f"Error: {url} returned status code {info['status_code']}",
             )
             has_errors = True
         if (
@@ -73,7 +74,7 @@ def main():
             and is_same_domain(url, args.url)
         ):
             final_errors.append(
-                f"Error: {url} exceeds maximum size of {args.max_size} bytes (actual size: {info['size']} bytes)"
+                f"Error: {url} exceeds maximum size of {args.max_size} bytes (actual size: {info['size']} bytes)",
             )
             size_exceeded = True
 
@@ -81,7 +82,6 @@ def main():
     for error in final_errors:
         logger.error(error)
 
-    print(f"Results written to {output_file}", file=sys.stderr)
 
     if has_errors or size_exceeded:
         return 1
@@ -89,4 +89,4 @@ def main():
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())
