@@ -1,92 +1,122 @@
 #!/usr/bin/env python3
+import re
 import subprocess
 import sys
-import re
-from pathlib import Path
-import json
+from typing import Protocol, TypedDict
+
+# Inspired by https://blog.danslimmon.com/2019/07/15/do-nothing-scripting-the-key-to-gradual-automation/
+
+class Context(TypedDict):
+    bump_type: str
+    current_version: str
+
 
 def get_current_version() -> str:
-    pyproject_path = Path("pyproject.toml")
-    if pyproject_path.exists():
-        content = pyproject_path.read_text()
-        if match := re.search(r'version\s*=\s*"([^"]+)"', content):
-            return match.group(1)
-
-    raise FileNotFoundError("Could not find version in pyproject.toml")
-
-
-def bump_version(current_version, bump_type):
-    major, minor, patch = map(int, current_version.split("."))
-
-    if bump_type == "major":
-        return f"{major + 1}.0.0"
-    elif bump_type == "minor":
-        return f"{major}.{minor + 1}.0"
-    else:  # patch
-        return f"{major}.{minor}.{patch + 1}"
-
-
-def update_version_in_files(new_version: str):
-    # Update pyproject.toml if it exists
-    pyproject_path = Path("pyproject.toml")
-    if pyproject_path.exists():
-        content = pyproject_path.read_text()
-        updated_content = re.sub(
-            r'!(bump-)version\s*=\s*"[^"]+"', f'version = "{new_version}"', content
+    """Retrieves the current version from the codebase."""
+    try:
+        result = subprocess.run(
+            ["uv", "version", "--short"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
-        pyproject_path.write_text(updated_content)
+        return result.stdout.strip()
+    except subprocess.CalledProcessError as e:
+        raise RuntimeError(f"Failed to get current version: {e}")
 
-    # Update __init__.py if it exists
-    init_path = Path("src/find_404/__init__.py")
-    if init_path.exists():
-        content = init_path.read_text()
-        updated_content = re.sub(
-            r'__version__\s*=\s*"[^"]+"', f'__version__ = "{new_version}"', content
+
+def wait_for_enter() -> None:
+    """Waits for the user to press Enter."""
+    input("Press Enter to continue...")
+
+
+class Step(Protocol):
+    """Protocol for version bump steps."""
+    def run(self, context: Context) -> None:
+        """Execute the step with the given context."""
+        ...
+
+
+class FailIfDirty:
+    def run(self, context: Context) -> None:
+        """Checks if the git repository is dirty (has uncommitted changes)."""
+        result = subprocess.run(
+            ["git", "status", "--porcelain"],
+            capture_output=True,
+            text=True,
+            check=True,
         )
-        init_path.write_text(updated_content)
+        if result.stdout.strip():
+            raise RuntimeError("Git repository is dirty. Please commit or stash changes before running this script.")
 
-    # Update uv.lock if it exists
-    uv_lock = Path("uv.lock")
-    if uv_lock.exists():
-        content = uv_lock.read_text()
-        updated_content = re.sub(
-            r'!(bump-)version\s*=\s*"[^"]+"', f'version = "{new_version}"', content
+class BumpVersion:
+    def run(self, context: Context) -> None:
+        """Bumps the version number in the actual codebase. We use `uv version` to do so."""
+        bump_type = context["bump_type"]
+        result = subprocess.run(
+            ["uv", "version", "--bump", bump_type],
+            capture_output=True,
+            text=True,
+            check=True,
         )
-        uv_lock.write_text(updated_content)
+        # Get the new version and update context
+        context["current_version"] = get_current_version()
 
+class CommitVersion:
+    def run(self, context: Context) -> None:
+        """Commits the new version number to the git repository."""
+        subprocess.run(
+            ["git", "commit", "-am", f"Bump version to {context['current_version']}"],
+            check=True,
+        )
 
-def main():
-    if len(sys.argv) != 2 or sys.argv[1] not in ["major", "minor", "patch"]:
-        print("Usage: bump_version.py [major|minor|patch]")
+class TagVersion:
+    def run(self, context: Context) -> None:
+        """Tags the new version in the git repository."""
+        current_version = context["current_version"]
+        subprocess.run(
+            ["git", "tag", "-a", f"v{current_version}", "-m", f"Release version {current_version}"],
+            check=True,
+        )
+
+class PushChanges:
+    def run(self, context: Context) -> None:
+        """Pushes the changes to the remote repository."""
+        subprocess.run(["git", "push"], check=True)
+        subprocess.run(["git", "push", "--tags"], check=True)
+
+class CreateRelease:
+    def run(self, context: Context) -> None:
+        """Creates a new release using GitHub CLI."""
+        current_version = context["current_version"]
+        subprocess.run(
+            ["gh", "release", "create", "--generate-notes", f"v{current_version}"],
+            check=True,
+        )
+
+def main() -> None:
+    if len(sys.argv) != 2:
+        print("Usage: python bump_version.py <bump_type>")
+        print("Example: python bump_version.py minor")
         sys.exit(1)
-
     bump_type = sys.argv[1]
-    current_version = get_current_version()
-    print(f"Current version: {current_version}")
-    new_version = bump_version(current_version, bump_type)
 
-    # Update version in files
-    update_version_in_files(new_version)
+    context: Context = {
+        "bump_type": bump_type,
+        "current_version": get_current_version(),
+    }
 
-    # Git commands
-    subprocess.run(["git", "add", "."], check=True)
-    subprocess.run(
-        ["git", "commit", "-m", f"Bump version to {new_version}"], check=True
-    )
-    subprocess.run(
-        ["git", "tag", "-a", f"v{new_version}", "-m", f"Release version {new_version}"],
-        check=True,
-    )
-    subprocess.run(["git", "push"], check=True)
-    subprocess.run(["git", "push", "origin", f"v{new_version}"], check=True)
-    subprocess.run(["uv", "sync"], check=True)
+    procedure = [
+        FailIfDirty(),
+        BumpVersion(),
+        CommitVersion(),
+        TagVersion(),
+        PushChanges(),
+        CreateRelease(),
+    ]
 
-    print(f"Successfully bumped version to {new_version} and created release tag")
-
-    # Create a new release
-    print("You can create a new release with the following command:")
-    print(f'gh release create v{new_version} -t "Release {new_version}" --notes-from-tag')
-
+    for step in procedure:
+        step.run(context)
 
 if __name__ == "__main__":
     main()
