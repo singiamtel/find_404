@@ -9,31 +9,49 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def setup_logging(debug=False, output_file=None):
-    """Configure logging with handlers for file (INFO) and stderr (ERROR and DEBUG)."""
+def setup_logging(verbose=False, format_type="console", output_destination="stdout", output_file=None):
+    """Configure logging with flexible output format and destination.
+    
+    Args:
+        verbose (bool): Enable debug logging
+        format_type (str): "console" or "jsonl" 
+        output_destination (str): "stdout" or "file"
+        output_file (str): File path when output_destination is "file"
+    """
     # Create our own logger
     logger = logging.getLogger("crawler")
     logger.handlers = []  # Clear any existing handlers
     logger.propagate = False  # Don't propagate to root logger
 
-    # Set base level based on debug flag
-    logger.setLevel(logging.DEBUG if debug else logging.INFO)
+    # Set base level based on verbose flag
+    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
 
-    # Create formatter
-    formatter = logging.Formatter("%(message)s")
+    # Create appropriate formatter based on format type
+    if format_type == "jsonl":
+        # For JSONL, we want clean output without extra formatting
+        main_formatter = logging.Formatter("%(message)s")
+        error_formatter = logging.Formatter("%(message)s")
+    else:  # console format
+        main_formatter = logging.Formatter("%(message)s")
+        error_formatter = logging.Formatter("%(levelname)s: %(message)s")
 
-    # Create file handler for INFO level (JSONL output)
-    if output_file:
-        file_handler = logging.FileHandler(output_file, mode="w")
-        file_handler.setLevel(logging.INFO)
-        file_handler.setFormatter(formatter)
-        file_handler.addFilter(lambda record: record.levelno == logging.INFO)
-        logger.addHandler(file_handler)
+    # Create main output handler (INFO level messages)
+    if output_destination == "stdout":
+        main_handler = logging.StreamHandler(sys.stdout)
+    else:  # file output
+        if not output_file:
+            raise ValueError("output_file must be specified when output_destination is 'file'")
+        main_handler = logging.FileHandler(output_file, mode="w")
+    
+    main_handler.setLevel(logging.INFO)
+    main_handler.setFormatter(main_formatter)
+    main_handler.addFilter(lambda record: record.levelno == logging.INFO)
+    logger.addHandler(main_handler)
 
-    # Create stderr handler for ERROR and DEBUG
+    # Create stderr handler for ERROR and DEBUG (always goes to stderr)
     stderr_handler = logging.StreamHandler(sys.stderr)
     stderr_handler.setLevel(logging.DEBUG)
-    stderr_handler.setFormatter(formatter)
+    stderr_handler.setFormatter(error_formatter)
     stderr_handler.addFilter(lambda record: record.levelno != logging.INFO)
     logger.addHandler(stderr_handler)
 
