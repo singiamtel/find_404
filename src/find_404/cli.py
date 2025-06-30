@@ -11,6 +11,20 @@ from .crawler import crawl_site, is_same_domain, setup_logging
 
 def main() -> int:
     """Main entry point for the CLI."""
+    # Check if no arguments provided and show examples
+    if len(sys.argv) == 1:
+        print("find_404 - Crawl websites and find broken links\n")
+        print("Usage: find_404 <URL> [options]\n")
+        print("Examples:")
+        print("  # Check for broken links (console output)")
+        print("  find_404 example.com")
+        print("")
+        print("  # Check for broken links with JSONL output")
+        print("  find_404 example.com --format jsonl")
+        print("")
+        print("For more options, use: find_404 --help")
+        return 0
+    
     parser = argparse.ArgumentParser(
         description="Crawl a website and check for broken links and size limits",
     )
